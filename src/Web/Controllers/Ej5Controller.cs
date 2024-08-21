@@ -1,43 +1,42 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using System.ComponentModel.DataAnnotations;
-using System.Numerics;
 
-namespace Web;
+namespace Web.Controllers;
 
-[Route("api/[controller]")]
+[Route("/api/[controller]")]
 [ApiController]
 
-public class Ej5Controller : ControllerBase
+public class Ej5Controlller : ControllerBase
 {
-
     [HttpGet]
 
-    public ActionResult Get(double price, int quantity, string payMethod, string cardNumber)
+    public ActionResult Get(string day)
     {
-        if (price <= 0 || quantity <= 0)
-        {
-            return BadRequest("el precio y la cantidad tiene que ser mayores a cero.");
-        }
 
-        double total = price * quantity;
-
-        if (payMethod.ToLower().Trim() == "tarjeta")
+        try
         {
-            if (string.IsNullOrEmpty(cardNumber) || cardNumber.Length != 16)
+            string dayCompare = day.ToLower().Trim();
+
+            List<string> Weekend = ["sabado", "domingo"];
+
+            List<string> Week = ["lunes", "martes", "miercoles", "jueves", "viernes"];
+
+            if (Weekend.Contains(dayCompare))
             {
-                return BadRequest("el numero ingresado tiene que tener 16 caracteres.");
+                return Ok("Es fin de semana");
             }
-
-            total += total * 0.10;
+            else if (Week.Contains(dayCompare))
+            {
+                return Ok("NO es fin de semana");
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, "el dia ingresado no es valido");
+            }
         }
-
-        else if (payMethod.ToLower().Trim() != "efectivo")
+        catch (System.Exception)
         {
-            return StatusCode(StatusCodes.Status400BadRequest, "metodo de pago no admitido");
+
+            return StatusCode(StatusCodes.Status500InternalServerError, "error interno");
         }
-
-        return Ok(total);
-
     }
 }
